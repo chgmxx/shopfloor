@@ -31,7 +31,7 @@ bool http_create_socket(SOCKET *sock, SOCKADDR_IN *sin, const char *ip)
  
 }
  
-char* http_request(SOCKET sock, const char *hostname, const char *page, s_query_routing_parameter_list *routing_para)
+char* http_request(SOCKET sock, const char *hostname, const char *url)
 {
   char buf[BUFSIZ];
   char *result = NULL;
@@ -99,6 +99,7 @@ char* http_header_strip(char* content)
 
 int QueryRoutingParameterList() {
   WSADATA WSAData;
+  char url[BUFSIZ];
   int erreur = WSAStartup(MAKEWORD(2, 2), &WSAData);
   if(erreur) {
     puts("Cannot start WSA");
@@ -118,7 +119,8 @@ int QueryRoutingParameterList() {
   routing_para.model="00";
   routing_para.station_type = "00";
   routing_para.wip_no = "00";
-  content = http_request(sock, hostname, page);
+  sprintf(url, IP_CONNECT_STRING, IP_ADDRESS, routing_para.cmd, routing_para.wip_no, routing_para.station_type);
+  content = http_request(sock, NULL, url);
 
   if(content == NULL) {
     puts(ERR_NODATA);
@@ -137,4 +139,31 @@ int QueryRoutingParameterList() {
 #endif
 
   return EXIT_SUCCESS;
+}
+//http://10.195.226.56/MLB/AddGK?cmd=QUERY_ROUTING&wip_no=BIR0000000000000&station_type=BB1
+int parseRoutingResponse(char *content ){
+
+}
+int getElement(const char *content, char *tag, char *value) {
+  char buf[100] = { 0 };
+  char *subString = NULL;
+  char tempChar = 0;
+  int i = 0;
+  if(NULL == tag || NULL == content || NULL == value) {
+    return -1;
+  }
+  if((subString = strstr(content, tag)) == NULL) {
+    return -1;
+  }
+  subString += strlen(tag) + strlen("="); //include '='
+  tempChar = *subString;
+  while(tempChar != '\n'
+        && tempChar != '\0'
+        && tempChar != '&') {
+    buf[i] = tempChar;
+    tempChar = *(++subString);
+    i++;
+  }
+  strcpy(value, buf);
+  return 0;
 }
