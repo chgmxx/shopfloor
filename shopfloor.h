@@ -85,3 +85,34 @@ typedef struct{
     char test_result[MAX_STRLEN];
     char symptom_code[MAX_STRLEN];
 }s_test_item_result_parameter_list;
+
+//5. Upload Final Test Result
+typedef struct{
+    char cmd;
+    char wip_no[MAX_STRLEN];
+    char station_type[MAX_STRLEN];
+    char station_code[MAX_STRLEN];
+    char test_machine_id[MAX_STRLEN];
+    char start_time[MAX_STRLEN];
+    char stop_time[MAX_STRLEN];
+    char test_result[MAX_STRLEN];
+    char symptom_code[MAX_STRLEN];
+    char symptom_msg[MAX_STRLEN];
+    char imei[MAX_STRLEN];
+    char imei2[MAX_STRLEN];
+    char meid[MAX_STRLEN];
+    char esn[MAX_STRLEN];
+    char bt_addr[MAX_STRLEN];
+    char  wifi_mac_addr[MAX_STRLEN];//TODO : this item maybe incorrect
+    char sim_lock_nkey[MAX_STRLEN];
+    char sim_lock_nskey[MAX_STRLEN];
+    char shipping_os_image_name[MAX_STRLEN];
+    char test_item_name[MAX_STRLEN];
+    char test_spec_name[MAX_STRLEN];
+    char test_value[MAX_STRLEN];
+    char upper_bound[MAX_STRLEN];
+    char low_bound[MAX_STRLEN];
+    char item_symptom_code[MAX_STRLEN];
+    char diag_version[MAX_STRLEN];
+}s_upload_final_test_result;
+

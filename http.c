@@ -84,10 +84,8 @@ char* http_request(SOCKET sock, const char *hostname, const char *url)
           strncat(result, buf, l);
         }
       }
-
     }
   }
-
 
   return result;
 }
@@ -97,52 +95,196 @@ char* http_header_strip(char* content)
   return strstr(content, "\r\n\r\n")+4;
 }
 
+//3. ROUTING CHECK
 int QueryRoutingParameterList() {
-  WSADATA WSAData;
   char url[BUFSIZ];
-  int erreur = WSAStartup(MAKEWORD(2, 2), &WSAData);
-  if(erreur) {
-    puts("Cannot start WSA");
-    exit(EXIT_FAILURE);
-  }
-  SOCKET sock;
-  SOCKADDR_IN sin;
-
-  if(!http_create_socket(&sock, &sin, IP_ADDRESS)) {
-    puts("Cannot create http socket");
-    exit(EXIT_FAILURE);
-  }
-  printf("Connected to %s/%s (%s:%d)\n", IP_ADDRESS,page, inet_ntoa(sin.sin_addr), htons(sin.sin_port));
   char *content = NULL;
   s_query_routing_parameter_list routing_para = { 0 };
+
   routing_para.cmd = 0 ;
   routing_para.model="00";
   routing_para.station_type = "00";
   routing_para.wip_no = "00";
   sprintf(url, IP_CONNECT_STRING, IP_ADDRESS, routing_para.cmd, routing_para.wip_no, routing_para.station_type);
+  content = postDataToServer(IP_ADDRESS, url);
+  parseRoutingResponse(content);
+  return EXIT_SUCCESS;
+}
+//http://10.195.226.56/MLB/AddGK?cmd=QUERY_ROUTING&wip_no=BIR0000000000000&station_type=BB1
+int parseRoutingResponse(char *content ){
+
+}
+
+//4. Upload TestItem Result
+int UploadTestItemResult(s_test_item_result_parameter_list *result) {
+  if(NULL == result) {
+    return -1;
+  }
+  char url[BUFSIZ]={0};
+  char *content = NULL;
+//  http://10.195.226.56/MLB/AddGK?cmd=ADD_TEST_ITEM&wip_no=BIR0000000000000& test_station_name=MT
+//&station_code=MT001&test_item_name=BT_TX_BDR& test_spec_name=Power_Average_dBm
+//&test_value=16.2&upper_bound=13.0&low_bound=1.0&test_result=1&symptom_code=BT
+//_OUTPUT_POWER_FAIL
+  strcat(url, "http: //");
+  strcat(url, "");
+  strcat(url, IP_ADDRESS);
+  strcat(url, "/MLB/AddGK?cmd=ADD_TEST_ITEM");
+  strcat(url, "&wip_no=");
+  strcat(url, result->wip_no);
+
+  strcat(url, "&test_station_name=");
+  strcat(url, result->test_station_name);
+
+  strcat(url, "&station_code=");
+  strcat(url, result->station_code);
+
+  strcat(url, "&test_item_name=");
+  strcat(url, result->test_item_name);
+
+  strcat(url, "&=test_spec_name");
+  strcat(url, result->test_spec_name);
+
+  strcat(url, "&=test_value");
+  strcat(url, result->test_value);
+
+  strcat(url, "&=upper_bound");
+  strcat(url, result->upper_bound);
+
+  strcat(url, "&=low_bound");
+  strcat(url, result->low_bound);
+
+  strcat(url, "&=test_result");
+  strcat(url, result->test_result);
+
+  strcat(url, "&=symptom_code");
+  strcat(url, result->symptom_code);
+
+  content =  postDataToServer(IP_ADDRESS, url);
+  //TODO: Parsing response
+
+  if(NULL != content) {
+    free(content)
+  }
+
+}
+
+int parseUploadTestItemResultResponse(char *content) {
+
+}
+//5. Upload Final Test Result
+int UploadFinalTestResult(s_upload_final_test_result *result) {
+  if(NULL == result) {
+    return -1;
+  }
+  char url[BUFSIZ] = { 0 };
+  char *content = NULL;
+//http://10.195.226.56/MLB/AddGK?cmd=ADD_TEST
+//    &wip_no=BIR0000000000000&station_type=BB1&station_code=FXZZ_K0
+//    6-2FT-01A_6_BB1&test_machine_id=PC-0001
+//    &start_time=2012-12-05 13:00:07&stop_time=2012-12-0513:00:11
+//&test_result=0&symptom_code=&symptom_msg=&bt_addr=
+//&wifi_mac_addr=&sim_lock_nkey&sim_lock_nskey=&shi pping_os_image_name=VKY-3420-0-15CN-A01
+//&test_item_name=BT_TX_BDR&test_spec_name=Power_Average_dBm
+//&test_v alue=6.2&upper_bound=13.0&low_bound=1.0
+//&symptom_code=BT_OUTPUT_POWER_FAIL&diag_version=DBU-0390-0-000F
+//-A01
+  strcat(url, "http: //");
+  strcat(url, "");
+  strcat(url, IP_ADDRESS);
+  strcat(url, "/MLB/AddGK?cmd=ADD_TEST");
+
+  strcat(url, "");
+  strcat(url, "&=wip_no");
+  strcat(url, result->wip_no);
+
+  strcat(url, "&=station_type");
+  strcat(url, result->station_type);
+  strcat(url, "&=station_code");
+  strcat(url, result->station_code);
+  strcat(url, "&=test_machine_id");
+  strcat(url, result->test_machine_id);
+  strcat(url, "&=start_time");
+  strcat(url, result->start_time);
+  strcat(url, "&=stop_time");
+  strcat(url, result->stop_time);
+  strcat(url, "&=test_result");
+  strcat(url, result->test_result);
+  strcat(url, "&=symptom_code");
+  strcat(url, result->symptom_code);
+  strcat(url, "&=symptom_msg");
+  strcat(url, result->symptom_msg);
+  strcat(url, "&=bt_addr");
+  strcat(url, result->bt_addr);
+  strcat(url, "&=wifi_mac_addr");
+  strcat(url, result->wifi_mac_addr);
+  strcat(url, "&=sim_lock_nkey");
+  strcat(url, result->sim_lock_nkey);
+  strcat(url, "&=sim_lock_nskey");
+  strcat(url, result->sim_lock_nskey);
+  strcat(url, "&=shipping_os_image_name");
+  strcat(url, result->shipping_os_image_name);
+  strcat(url, "&=test_item_name");
+  strcat(url, result->test_item_name);
+  strcat(url, "&=test_spec_name");
+  strcat(url, result->test_spec_name);
+  strcat(url, "&=test_value");
+  strcat(url, result->test_value);
+  strcat(url, "&=upper_bound");
+  strcat(url, result->upper_bound);
+  strcat(url, "&=low_bound");
+  strcat(url, result->low_bound);
+  strcat(url, "&=symptom_code");
+  strcat(url, result->symptom_code);
+  strcat(url, "&=diag_version");
+  strcat(url, result->diag_version);
+  content =  postDataToServer(IP_ADDRESS, url);
+
+  if(NULL != content) {
+    free(content)
+  }
+}
+//common function
+char* postDataToServer(const char *hostname, const char *url) {
+  char *content = NULL;
+  WSADATA WSAData;
+  SOCKET sock;
+  SOCKADDR_IN sin;
+
+  if(NULL == url || strlen(url) == 0) {
+    return -1;
+  }
+  int erreur = WSAStartup(MAKEWORD(2, 2), &WSAData);
+  if(erreur) {
+    puts("Cannot start WSA");
+    exit(EXIT_FAILURE);
+  }
+
+  if(!http_create_socket(&sock, &sin, hostname)) {
+    puts("Cannot create http socket");
+    return NULL;
+  }
+
+  printf("Connected to %s/%s (%s:%d)\n", hostname, page, inet_ntoa(sin.sin_addr), htons(sin.sin_port));
+
   content = http_request(sock, NULL, url);
 
   if(content == NULL) {
     puts(ERR_NODATA);
-    exit(EXIT_FAILURE);
+    return NULL;
   }
 
   puts(content);
 
   //char *content_core = http_header_strip(content);
 
-  free(content);
+  //free(content);
   closesocket(sock);
 
 #if defined (WIN32)
   WSACleanup();
 #endif
-
-  return EXIT_SUCCESS;
-}
-//http://10.195.226.56/MLB/AddGK?cmd=QUERY_ROUTING&wip_no=BIR0000000000000&station_type=BB1
-int parseRoutingResponse(char *content ){
-
+  return content;
 }
 int getElement(const char *content, char *tag, char *value) {
   char buf[100] = { 0 };
