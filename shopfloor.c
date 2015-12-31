@@ -1,14 +1,11 @@
-#include "error.h"
+#include "shopfloor.h"
+#include "http.h"
 
 int main(){
-
+    int i = 0;
+    printf("hello world\n");
+    scanf("%d", &i);
+    return 0;
 }
 
-int QueryRoutingParameterList(){
-    WSADATA WSAData;
-    int erreur = WSAStartup(MAKEWORD(2, 2), &WSAData);
-    if(erreur) {
-        puts("Cannot start WSA");
-        exit(EXIT_FAILURE);
-    }
-}
+

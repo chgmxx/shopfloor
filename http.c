@@ -1,5 +1,6 @@
 #include "http.h"
-
+#include "shopfloor.h"
+char* postDataToServer(const char *hostname, const char *url);
 char* host_to_ip(const char* hostname)
 {
   struct hostent *host_entry;
@@ -12,6 +13,9 @@ char* host_to_ip(const char* hostname)
  
 bool http_create_socket(SOCKET *sock, SOCKADDR_IN *sin, const char *ip)
 {
+#ifdef WIN32
+	u_long mode = 1;
+#endif
   *sock = socket(AF_INET, SOCK_STREAM, 0);		//init the socket
  
   sin->sin_addr.s_addr = inet_addr(ip);			//init the socket address on ip / port / network
@@ -23,7 +27,7 @@ bool http_create_socket(SOCKET *sock, SOCKADDR_IN *sin, const char *ip)
 #ifdef linux
   fcntl(*sock, F_SETFL, O_NONBLOCK);
 #elif defined WIN32
-  u_long mode=1;
+  
   ioctlsocket(*sock,FIONBIO,&mode); 
 #endif
 
@@ -51,8 +55,8 @@ char* http_request(SOCKET sock, const char *hostname, const char *url)
   send(sock, "\r\n", strlen("\r\n"), 0);
   #endif
 //#define IP_CONNECT_STRING "http://%s/MLB/AddGK?cmd=%s&wip_no=%s&station_type=%s"
-  l = sprintf(buf, IP_CONNECT_STRING, IP_ADDRESS, routing_para->cmd, routing_para->wip_no, routing_para->station_type);
-  send(sock, buf, l, 0);
+ // l = sprintf(buf, IP_CONNECT_STRING, IP_ADDRESS, routing_para->cmd, routing_para->wip_no, routing_para->station_type);
+  send(sock, url, strlen(url), 0);
   // timeout
   struct timeval tv;
   tv.tv_sec = TIMEOUT_SEC;
@@ -102,9 +106,9 @@ int QueryRoutingParameterList() {
   s_query_routing_parameter_list routing_para = { 0 };
 
   routing_para.cmd = 0 ;
-  routing_para.model="00";
-  routing_para.station_type = "00";
-  routing_para.wip_no = "00";
+  //routing_para.model=;
+  //routing_para.station_type = "00";
+  //routing_para.wip_no = "00";
   sprintf(url, IP_CONNECT_STRING, IP_ADDRESS, routing_para.cmd, routing_para.wip_no, routing_para.station_type);
   content = postDataToServer(IP_ADDRESS, url);
   parseRoutingResponse(content);
@@ -164,7 +168,7 @@ int UploadTestItemResult(s_test_item_result_parameter_list *result) {
   //TODO: Parsing response
 
   if(NULL != content) {
-    free(content)
+      free(content);
   }
 
 }
@@ -241,7 +245,7 @@ int UploadFinalTestResult(s_upload_final_test_result *result) {
   content =  postDataToServer(IP_ADDRESS, url);
 
   if(NULL != content) {
-    free(content)
+      free(content);
   }
 }
 //common function
@@ -252,7 +256,7 @@ char* postDataToServer(const char *hostname, const char *url) {
   SOCKADDR_IN sin;
 
   if(NULL == url || strlen(url) == 0) {
-    return -1;
+    return NULL;
   }
   int erreur = WSAStartup(MAKEWORD(2, 2), &WSAData);
   if(erreur) {
@@ -265,12 +269,11 @@ char* postDataToServer(const char *hostname, const char *url) {
     return NULL;
   }
 
-  printf("Connected to %s/%s (%s:%d)\n", hostname, page, inet_ntoa(sin.sin_addr), htons(sin.sin_port));
+  printf("Connected to %s/%s (%s:%d)\n", hostname, url, inet_ntoa(sin.sin_addr), htons(sin.sin_port));
 
   content = http_request(sock, NULL, url);
 
   if(content == NULL) {
-    puts(ERR_NODATA);
     return NULL;
   }
 

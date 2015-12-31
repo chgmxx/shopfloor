@@ -14,10 +14,9 @@
 #include <errno.h>
 #include <time.h>
 #include <stdbool.h>
-#include <unistd.h>
+
 #include <fcntl.h>
 
-char* strdup (const char* str);
  
 #ifdef WIN32
 #include <winsock2.h> 
@@ -37,7 +36,7 @@ typedef struct sockaddr_in SOCKADDR_IN;
 typedef struct sockaddr SOCKADDR;
 typedef struct in_addr IN_ADDR;
 #endif
-#include "shopfloor.h"
+
 #define PORT		 80
 #define USER_AGENT      "User-Agent: Mozilla/5.0 (X11; U; Linux i686; fr; rv:1.9.2.10) Gecko/20100922 Ubuntu/11.10 (lucid) Firefox/5.0 GTB7.1\r\n"
 #define ENCODE_TYPE     "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/ *;q=0.8\r\n"

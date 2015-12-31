@@ -1,3 +1,5 @@
+#ifndef SHOP_FLOOR_H
+#define SHOP_FLOOR_H
 #include "stdio.h"
 //by cgm@meitu.com
 ///Communication between xxx Station and SFC is through HTTP POST requests.
@@ -115,4 +117,6 @@ typedef struct{
     char item_symptom_code[MAX_STRLEN];
     char diag_version[MAX_STRLEN];
 }s_upload_final_test_result;
+
+#endif
 
