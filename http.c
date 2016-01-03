@@ -1,5 +1,6 @@
 #include "http.h"
 #include "shopfloor.h"
+
 char* postDataToServer(const char *hostname, const char *url);
 char* host_to_ip(const char* hostname)
 {
@@ -14,11 +15,12 @@ char* host_to_ip(const char* hostname)
 bool http_create_socket(SOCKET *sock, SOCKADDR_IN *sin, const char *ip)
 {
 #ifdef WIN32
-	u_long mode = 1;
+	u_long mode = 0; //0:block
 #endif
   *sock = socket(AF_INET, SOCK_STREAM, 0);		//init the socket
  
   sin->sin_addr.s_addr = inet_addr(ip);			//init the socket address on ip / port / network
+
   sin->sin_port = htons(PORT);
   sin->sin_family = AF_INET;
  
@@ -39,7 +41,7 @@ char* http_request(SOCKET sock, const char *hostname, const char *url)
 {
   char buf[BUFSIZ];
   char *result = NULL;
-  int l = 0;
+  int len = 0;
   int selection;
 
   #if 0
@@ -61,10 +63,11 @@ char* http_request(SOCKET sock, const char *hostname, const char *url)
   struct timeval tv;
   tv.tv_sec = TIMEOUT_SEC;
   tv.tv_usec = TIMEOUT_MSEC;
-
+#if 0
   fd_set fdread;
   FD_ZERO(&fdread);
   FD_SET(sock, &fdread);
+
 
   while(1) {
 
@@ -90,7 +93,23 @@ char* http_request(SOCKET sock, const char *hostname, const char *url)
       }
     }
   }
-
+#endif
+  //∩車﹞t???¯?車那邦那y?Y
+  len = recv(sock, buf, sizeof(buf), 0);
+  if (len == 0)
+      return NULL;
+  else if (len == SOCKET_ERROR)
+  {
+      printf("recv() Failed: %d \n", WSAGetLastError());
+      return NULL;
+  }
+  else
+      printf("recv() data from sever: %s \n", buf);
+  result = malloc(sizeof(buf));
+  
+  if (NULL != result){
+      strcpy(result, buf);
+  }
   return result;
 }
 
@@ -109,6 +128,18 @@ int QueryRoutingParameterList() {
   //routing_para.model=;
   //routing_para.station_type = "00";
   //routing_para.wip_no = "00";
+  /*
+  l = sprintf(buf, "GET %s %s\r\n", page, HTTP_VERSION);
+  send(sock, buf, l, 0);
+  buf[0] = '\0';
+  l = sprintf(buf, "Host: %s\r\n", hostname);
+  send(sock, buf, l, 0);
+  buf[0]='\0';
+  send(sock, USER_AGENT, strlen(USER_AGENT), 0);
+  send(sock, ENCODE_TYPE, strlen(ENCODE_TYPE), 0);
+  send(sock, CONNECTION_TYPE, strlen(CONNECTION_TYPE), 0);
+  send(sock, "\r\n", strlen("\r\n"), 0);
+  */
 #ifdef SHOP_DEBUG
   strcpy(url, "POST ");
   strcat(url, "/shop/MyServlet?cmd=QUERY_ROUTING&wip_no=BIR0000000000000&station_type=BB1 ");
