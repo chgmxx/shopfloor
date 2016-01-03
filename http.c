@@ -101,7 +101,7 @@ char* http_header_strip(char* content)
 
 //3. ROUTING CHECK
 int QueryRoutingParameterList() {
-  char url[BUFSIZ];
+    char url[BUFSIZ] = { 0 };
   char *content = NULL;
   s_query_routing_parameter_list routing_para = { 0 };
 
@@ -109,8 +109,19 @@ int QueryRoutingParameterList() {
   //routing_para.model=;
   //routing_para.station_type = "00";
   //routing_para.wip_no = "00";
+#ifdef SHOP_DEBUG
+  strcpy(url, "POST ");
+  strcat(url, "/shop/MyServlet?cmd=QUERY_ROUTING&wip_no=BIR0000000000000&station_type=BB1 ");
+  strcat(url, HTTP_VERSION);
+  strcat(url, "\r\n");
+  strcat(url, "Host: localhost:8088\r\n"); 
+  strcat(url, "Connection: Keep-Alive\r\n");  
+  strcat(url, "\r\n");  
+  content = postDataToServer("127.0.0.1", url);
+#else
   sprintf(url, IP_CONNECT_STRING, IP_ADDRESS, routing_para.cmd, routing_para.wip_no, routing_para.station_type);
   content = postDataToServer(IP_ADDRESS, url);
+#endif
   parseRoutingResponse(content);
   return EXIT_SUCCESS;
 }
@@ -311,4 +322,13 @@ int getElement(const char *content, char *tag, char *value) {
   }
   strcpy(value, buf);
   return 0;
+}
+
+
+int main(){
+    int i = 0;
+    printf("hello world\n");
+    QueryRoutingParameterList();
+    scanf("%d", &i);
+    return 0;
 }
